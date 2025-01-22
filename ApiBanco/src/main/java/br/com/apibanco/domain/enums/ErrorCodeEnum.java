@@ -5,6 +5,7 @@ public enum ErrorCodeEnum {
     CUSTOMER_NOT_FOUND("Customer not found", "ERR-001", 404),
     ADDRESS_NOT_FOUND("Address not found", "ERR-002", 404),
     AGENCY_NOT_FOUND("Agency not found", "ERR-003", 404),
+    DUPLICATE_AGENCY("Duplicate agency", "ERR-018", 409),
     TRANSACTION_NOT_FOUND("Transaction not found", "ERR-004", 404),
     ACCOUNT_NOT_FOUND("Account not found", "ERR-005", 404),
     INSUFFICIENT_BALANCE("Insufficient balance", "ERR-006", 400),

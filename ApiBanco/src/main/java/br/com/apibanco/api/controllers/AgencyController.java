@@ -18,6 +18,10 @@ public class AgencyController {
     public ResponseEntity<Agency> createAgency(@RequestBody Agency agency) {
         return ResponseEntity.ok(agencyService.createAgency(agency));
     }
+    @GetMapping("/number/{number}")
+    public ResponseEntity<Agency> getAgencyByNumber(@PathVariable int number) {
+        return ResponseEntity.ok(agencyService.getAgencyByNumber(number));
+    }
 
     @GetMapping
     public ResponseEntity<List<Agency>> getAllAgencies() {
