@@ -7,7 +7,6 @@ import br.com.apibanco.domain.exceptions.BusinessException;
 import br.com.apibanco.domain.models.Address;
 import br.com.apibanco.domain.models.Customer;
 import br.com.apibanco.domain.repositories.CustomerRepository;
-import br.com.apibanco.domain.services.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,37 +23,53 @@ public class CustomerService {
     private AddressService addressService;
 
     public List<CustomerDTO> getAllCustomers() {
-        return customerRepository.findAll().stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+        List<Customer> customers = customerRepository.findAll();
+        if (customers.isEmpty()) {
+            throw new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND);
+        }
+        return customers.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     public CustomerDTO getCustomerById(Long id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND.getCode(),
-                        ErrorCodeEnum.CUSTOMER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND));
         return toDTO(customer);
     }
 
     public CustomerDTO getCustomerByCpf(String cpf) {
+        if (cpf == null || cpf.isBlank()) {
+            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
+        }
         Customer customer = customerRepository.findByCpf(cpf)
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND.getCode(),
-                        ErrorCodeEnum.CUSTOMER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND));
         return toDTO(customer);
     }
 
-
     public void createCustomer(CustomerDTO customerDTO) {
+        if (customerDTO == null) {
+            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
+        }
         Address address = addressService.createAddress(toEntity(customerDTO.address()));
         Customer customer = toEntity(customerDTO);
         customer.setAddress(address);
-        customerRepository.save(customer);
+        try {
+            customerRepository.save(customer);
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            throw new BusinessException(ErrorCodeEnum.DUPLICATE_CUSTOMER_CPF);
+        }
     }
 
+
     public void updateCustomer(Long id, CustomerDTO updatedCustomerDTO) {
+        if (id == null || id <= 0) {
+            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
+        }
+        if (updatedCustomerDTO == null) {
+            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
+        }
+
         Customer existingCustomer = customerRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND.getCode(),
-                        ErrorCodeEnum.CUSTOMER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND));
 
         existingCustomer.setName(updatedCustomerDTO.name());
         existingCustomer.setCpf(updatedCustomerDTO.cpf());
@@ -68,18 +83,27 @@ public class CustomerService {
             existingCustomer.setAddress(address);
         }
 
-        customerRepository.save(existingCustomer);
+        try {
+            customerRepository.save(existingCustomer);
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            throw new BusinessException(ErrorCodeEnum.DUPLICATE_CUSTOMER_CPF_RG);
+        }
     }
 
 
     public void deleteCustomer(Long id) {
+        if (id == null || id <= 0) {
+            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
+        }
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND.getCode(),
-                        ErrorCodeEnum.CUSTOMER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND));
         customerRepository.delete(customer);
     }
 
     private Customer toEntity(CustomerDTO dto) {
+        if (dto == null) {
+            return null;
+        }
         Customer customer = new Customer();
         customer.setId(dto.id());
         customer.setName(dto.name());
@@ -92,6 +116,9 @@ public class CustomerService {
     }
 
     private CustomerDTO toDTO(Customer customer) {
+        if (customer == null) {
+            return null;
+        }
         return new CustomerDTO(
                 customer.getId(),
                 customer.getName(),
@@ -105,6 +132,9 @@ public class CustomerService {
     }
 
     private Address toEntity(AddressDTO dto) {
+        if (dto == null) {
+            return null;
+        }
         Address address = new Address();
         address.setId(dto.id());
         address.setUf(dto.uf());
@@ -118,6 +148,9 @@ public class CustomerService {
     }
 
     private AddressDTO toDTO(Address address) {
+        if (address == null) {
+            return null;
+        }
         return new AddressDTO(
                 address.getId(),
                 address.getUf(),

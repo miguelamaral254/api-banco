@@ -1,14 +1,12 @@
 package br.com.apibanco.domain.services;
 
-
-import br.com.apibanco.domain.exceptions.BusinessException;
 import br.com.apibanco.domain.models.Agency;
-import br.com.apibanco.domain.enums.ErrorCodeEnum;
 import br.com.apibanco.domain.repositories.AgencyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class AgencyService {
@@ -21,13 +19,16 @@ public class AgencyService {
     }
 
     public List<Agency> getAllAgencies() {
-        return agencyRepository.findAll();
+        List<Agency> agencies = agencyRepository.findAll();
+        if (agencies.isEmpty()) {
+            throw new NoSuchElementException("No agencies found.");
+        }
+        return agencies;
     }
 
     public Agency getAgencyById(Long id) {
         return agencyRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.AGENCY_NOT_FOUND.getCode(),
-                        ErrorCodeEnum.AGENCY_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new NoSuchElementException("Agency not found with ID: " + id));
     }
 
     public Agency updateAgency(Long id, Agency updatedAgency) {

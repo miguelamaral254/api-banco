@@ -42,9 +42,6 @@ public class CustomerController {
             throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
         }
         CustomerDTO customer = customerService.getCustomerById(id);
-        if (customer == null) {
-            throw new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND);
-        }
         return ResponseEntity.ok(customer);
     }
 
@@ -54,11 +51,9 @@ public class CustomerController {
             throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
         }
         CustomerDTO customer = customerService.getCustomerByCpf(cpf);
-        if (customer == null) {
-            throw new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND);
-        }
         return ResponseEntity.ok(customer);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateCustomer(@PathVariable Long id, @RequestBody CustomerDTO customerDTO) {
@@ -71,6 +66,7 @@ public class CustomerController {
         customerService.updateCustomer(id, customerDTO);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {

@@ -15,7 +15,11 @@ public enum ErrorCodeEnum {
     UNAUTHORIZED_ACCESS("Unauthorized access", "ERR-011", 401),
     OPERATION_NOT_ALLOWED("Operation not allowed", "ERR-012", 403),
     RESOURCE_CONFLICT("Resource conflict", "ERR-013", 409),
-    SERVER_ERROR("Internal server error", "ERR-014", 500);
+    SERVER_ERROR("Internal server error", "ERR-014", 500),
+    DUPLICATE_CUSTOMER_CPF("Duplicate customer CPF", "ERR-015", 409),
+    DUPLICATE_CUSTOMER_RG("Duplicate customer RG", "ERR-016", 409),
+    DUPLICATE_CUSTOMER_CPF_RG("Duplicate customer CPF or RG", "ERR-017", 409);
+
 
     private final String message;
     private final String code;
