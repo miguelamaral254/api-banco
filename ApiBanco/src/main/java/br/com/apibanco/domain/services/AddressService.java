@@ -1,5 +1,6 @@
 package br.com.apibanco.domain.services;
 
+import br.com.apibanco.domain.DTOs.AddressDTO;
 import br.com.apibanco.domain.enums.ErrorCodeEnum;
 import br.com.apibanco.domain.exceptions.BusinessException;
 import br.com.apibanco.domain.models.Address;
@@ -37,7 +38,6 @@ public class AddressService {
         return address;
     }
 
-
     public Address updateAddress(Long id, Address updatedAddress) {
         Address existingAddress = getAddressById(id);
         existingAddress.setUf(updatedAddress.getUf());
@@ -53,5 +53,37 @@ public class AddressService {
     public void deleteAddress(Long id) {
         Address address = getAddressById(id);
         addressRepository.delete(address);
+    }
+
+    public Address toEntity(AddressDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        Address address = new Address();
+        address.setId(dto.id());
+        address.setUf(dto.uf());
+        address.setCity(dto.city());
+        address.setNeighborhood(dto.neighborhood());
+        address.setStreet(dto.street());
+        address.setNumber(dto.number());
+        address.setComplement(dto.complement());
+        address.setZipCode(dto.zipCode());
+        return address;
+    }
+
+    public AddressDTO toDTO(Address address) {
+        if (address == null) {
+            return null;
+        }
+        return new AddressDTO(
+                address.getId(),
+                address.getUf(),
+                address.getCity(),
+                address.getNeighborhood(),
+                address.getStreet(),
+                address.getNumber(),
+                address.getComplement(),
+                address.getZipCode()
+        );
     }
 }

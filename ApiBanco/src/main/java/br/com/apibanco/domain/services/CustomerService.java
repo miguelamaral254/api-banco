@@ -45,7 +45,7 @@ public class CustomerService {
         return toDTO(customer);
     }
 
-    public void createCustomer(CustomerDTO customerDTO) {
+    public CustomerDTO createCustomer(CustomerDTO customerDTO) {
         if (customerDTO == null) {
             throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
         }
@@ -54,11 +54,11 @@ public class CustomerService {
         customer.setAddress(address);
         try {
             customerRepository.save(customer);
+            return toDTO(customer);
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new BusinessException(ErrorCodeEnum.DUPLICATE_CUSTOMER_CPF);
         }
     }
-
 
     public void updateCustomer(Long id, CustomerDTO updatedCustomerDTO) {
         if (id == null || id <= 0) {
@@ -67,29 +67,24 @@ public class CustomerService {
         if (updatedCustomerDTO == null) {
             throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
         }
-
         Customer existingCustomer = customerRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.CUSTOMER_NOT_FOUND));
-
         existingCustomer.setName(updatedCustomerDTO.name());
         existingCustomer.setCpf(updatedCustomerDTO.cpf());
         existingCustomer.setBirthDate(updatedCustomerDTO.birthDate());
         existingCustomer.setRg(updatedCustomerDTO.rg());
         existingCustomer.setEmail(updatedCustomerDTO.email());
         existingCustomer.setPhone(updatedCustomerDTO.phone());
-
         if (updatedCustomerDTO.address() != null) {
             Address address = addressService.createAddress(toEntity(updatedCustomerDTO.address()));
             existingCustomer.setAddress(address);
         }
-
         try {
             customerRepository.save(existingCustomer);
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new BusinessException(ErrorCodeEnum.DUPLICATE_CUSTOMER_CPF_RG);
         }
     }
-
 
     public void deleteCustomer(Long id) {
         if (id == null || id <= 0) {
@@ -100,7 +95,7 @@ public class CustomerService {
         customerRepository.delete(customer);
     }
 
-    private Customer toEntity(CustomerDTO dto) {
+    public Customer toEntity(CustomerDTO dto) {
         if (dto == null) {
             return null;
         }
@@ -112,10 +107,11 @@ public class CustomerService {
         customer.setRg(dto.rg());
         customer.setEmail(dto.email());
         customer.setPhone(dto.phone());
+        customer.setAddress(toEntity(dto.address()));
         return customer;
     }
 
-    private CustomerDTO toDTO(Customer customer) {
+    public CustomerDTO toDTO(Customer customer) {
         if (customer == null) {
             return null;
         }

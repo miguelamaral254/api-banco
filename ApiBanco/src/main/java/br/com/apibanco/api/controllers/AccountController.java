@@ -1,5 +1,6 @@
 package br.com.apibanco.api.controllers;
 
+import br.com.apibanco.domain.DTOs.CreateAccountDTO;
 import br.com.apibanco.domain.exceptions.BusinessException;
 import br.com.apibanco.domain.models.Account;
 import br.com.apibanco.domain.enums.ErrorCodeEnum;
@@ -18,11 +19,12 @@ public abstract class AccountController<T extends Account> {
     }
 
     @PostMapping
-    public ResponseEntity<T> createAccount(@RequestBody T account) {
-        if (account == null) {
+    public ResponseEntity<T> createAccount(@RequestBody CreateAccountDTO createAccountDTO) {
+        if (createAccountDTO == null) {
             throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
         }
-        return ResponseEntity.ok(accountService.createAccount(account));
+        T createdAccount = accountService.createAccount(createAccountDTO);
+        return ResponseEntity.ok(createdAccount);
     }
 
     @GetMapping

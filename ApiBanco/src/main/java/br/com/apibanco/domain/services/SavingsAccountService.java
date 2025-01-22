@@ -10,4 +10,10 @@ public class SavingsAccountService extends AccountService<SavingsAccount> {
     public SavingsAccountService(SavingsAccountRepository savingsAccountRepository) {
         super(savingsAccountRepository);
     }
+
+    @Override
+    protected SavingsAccount getEntityInstance() {
+        return new SavingsAccount();
+
+    }
 }

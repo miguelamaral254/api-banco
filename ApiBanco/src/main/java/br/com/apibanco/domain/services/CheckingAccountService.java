@@ -10,4 +10,9 @@ public class CheckingAccountService extends AccountService<CheckingAccount> {
     public CheckingAccountService(CheckingAccountRepository checkingAccountRepository) {
         super(checkingAccountRepository);
     }
+
+    @Override
+    protected CheckingAccount getEntityInstance() {
+        return new CheckingAccount();
+    }
 }
