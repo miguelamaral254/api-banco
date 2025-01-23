@@ -1,18 +1,18 @@
-package br.com.apibanco.domain.services;
+    package br.com.apibanco.domain.services;
 
-import br.com.apibanco.domain.models.CheckingAccount;
-import br.com.apibanco.domain.repositories.CheckingAccountRepository;
-import org.springframework.stereotype.Service;
+    import br.com.apibanco.domain.models.CheckingAccount;
+    import br.com.apibanco.domain.repositories.CheckingAccountRepository;
+    import org.springframework.stereotype.Service;
 
-@Service
-public class CheckingAccountService extends AccountService<CheckingAccount> {
+    @Service
+    public class CheckingAccountService extends AccountService<CheckingAccount> {
 
-    public CheckingAccountService(CheckingAccountRepository checkingAccountRepository) {
-        super(checkingAccountRepository);
+        public CheckingAccountService(CheckingAccountRepository checkingAccountRepository) {
+            super(checkingAccountRepository);
+        }
+
+        @Override
+        protected CheckingAccount getEntityInstance() {
+            return new CheckingAccount();
+        }
     }
-
-    @Override
-    protected CheckingAccount getEntityInstance() {
-        return new CheckingAccount();
-    }
-}

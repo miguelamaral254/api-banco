@@ -1,6 +1,8 @@
 package br.com.apibanco.domain.services;
 
+import br.com.apibanco.domain.DTOs.AccountResponseDTO;
 import br.com.apibanco.domain.DTOs.CreateTransactionDTO;
+import br.com.apibanco.domain.DTOs.TransactionResponseDTO;
 import br.com.apibanco.domain.exceptions.BusinessException;
 import br.com.apibanco.domain.models.Account;
 import br.com.apibanco.domain.models.Transaction;
@@ -10,9 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-// AJUSTAR FALHA NO  Document nesting depth (1001)
+import java.util.stream.Collectors;
 
-//criar automação pra remover saldo da conta inicial pra conta final
 @Service
 public class TransactionService {
 
@@ -25,7 +26,7 @@ public class TransactionService {
     @Autowired
     private SavingsAccountService savingsAccountService;
 
-    public Transaction createTransaction(CreateTransactionDTO transactionDTO) {
+    public TransactionResponseDTO createTransaction(CreateTransactionDTO transactionDTO) {
         if (transactionDTO == null) {
             throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
         }
@@ -48,25 +49,27 @@ public class TransactionService {
         transaction.setTargetAccount(targetAccount);
         transaction.setValueType(transactionDTO.valueType());
 
-        return transactionRepository.save(transaction);
+        transaction = transactionRepository.save(transaction);
+
+        // Converter para DTO antes de retornar
+        return new TransactionResponseDTO(transaction);
     }
 
     private Account findAccountByNumber(int number) {
-        // Verificar nas contas correntes
         Account account = checkingAccountService.getAllAccounts().stream()
-                .filter(a -> a.getNumber() == number)
+                .filter(a -> a.number() == number)
                 .findFirst()
+                .map(AccountResponseDTO::toEntity)
                 .orElse(null);
 
-        // Caso não seja encontrado, verificar nas contas poupança
         if (account == null) {
             account = savingsAccountService.getAllAccounts().stream()
-                    .filter(a -> a.getNumber() == number)
+                    .filter(a -> a.number() == number)
                     .findFirst()
+                    .map(AccountResponseDTO::toEntity)
                     .orElse(null);
         }
 
-        // Se ainda não foi encontrado, lançar exceção
         if (account == null) {
             throw new BusinessException(ErrorCodeEnum.ACCOUNT_NOT_FOUND);
         }
@@ -74,21 +77,27 @@ public class TransactionService {
         return account;
     }
 
-    public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
+    public List<TransactionResponseDTO> getAllTransactions() {
+        return transactionRepository.findAll().stream()
+                .map(TransactionResponseDTO::new)
+                .collect(Collectors.toList());
     }
 
-    public Transaction getTransactionById(Long id) {
+    public TransactionResponseDTO getTransactionById(Long id) {
         if (id == null || id <= 0) {
             throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
         }
 
-        return transactionRepository.findById(id)
+        Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.TRANSACTION_NOT_FOUND));
+
+        return new TransactionResponseDTO(transaction);
     }
 
     public void deleteTransaction(Long id) {
-        Transaction transaction = getTransactionById(id);
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.TRANSACTION_NOT_FOUND));
+
         transactionRepository.delete(transaction);
     }
 }

@@ -1,9 +1,8 @@
 package br.com.apibanco.api.controllers;
 
+import br.com.apibanco.domain.DTOs.AccountResponseDTO;
 import br.com.apibanco.domain.DTOs.CreateAccountDTO;
-import br.com.apibanco.domain.exceptions.BusinessException;
 import br.com.apibanco.domain.models.Account;
-import br.com.apibanco.domain.enums.ErrorCodeEnum;
 import br.com.apibanco.domain.services.AccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,49 +18,20 @@ public abstract class AccountController<T extends Account> {
     }
 
     @PostMapping
-    public ResponseEntity<T> createAccount(@RequestBody CreateAccountDTO createAccountDTO) {
-        if (createAccountDTO == null) {
-            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
-        }
-        T createdAccount = accountService.createAccount(createAccountDTO);
+    public ResponseEntity<AccountResponseDTO> createAccount(@RequestBody CreateAccountDTO createAccountDTO) {
+        AccountResponseDTO createdAccount = accountService.createAccount(createAccountDTO);
         return ResponseEntity.ok(createdAccount);
     }
 
     @GetMapping
-    public ResponseEntity<List<T>> getAllAccounts() {
-        List<T> accounts = accountService.getAllAccounts();
-        if (accounts.isEmpty()) {
-            throw new BusinessException(ErrorCodeEnum.ACCOUNT_NOT_FOUND);
-        }
+    public ResponseEntity<List<AccountResponseDTO>> getAllAccounts() {
+        List<AccountResponseDTO> accounts = accountService.getAllAccounts();
         return ResponseEntity.ok(accounts);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<T> getAccountById(@PathVariable Long id) {
-        if (id == null || id <= 0) {
-            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
-        }
-        T account = accountService.getAccountById(id);
-        if (account == null) {
-            throw new BusinessException(ErrorCodeEnum.ACCOUNT_NOT_FOUND);
-        }
+    public ResponseEntity<AccountResponseDTO> getAccountById(@PathVariable Long id) {
+        AccountResponseDTO account = accountService.getAccountById(id);
         return ResponseEntity.ok(account);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<T> updateAccount(@PathVariable Long id, @RequestBody T account) {
-        if (id == null || id <= 0 || account == null) {
-            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
-        }
-        return ResponseEntity.ok(accountService.updateAccount(id, account));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAccount(@PathVariable Long id) {
-        if (id == null || id <= 0) {
-            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
-        }
-        accountService.deleteAccount(id);
-        return ResponseEntity.noContent().build();
     }
 }

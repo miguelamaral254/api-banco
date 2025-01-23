@@ -1,7 +1,7 @@
 package br.com.apibanco.api.controllers;
 
 import br.com.apibanco.domain.DTOs.CreateTransactionDTO;
-import br.com.apibanco.domain.models.Transaction;
+import br.com.apibanco.domain.DTOs.TransactionResponseDTO;
 import br.com.apibanco.domain.services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,19 +17,21 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @PostMapping
-    public ResponseEntity<Transaction> createTransaction(@RequestBody CreateTransactionDTO transactionDTO) {
-        Transaction transaction = transactionService.createTransaction(transactionDTO);
-        return ResponseEntity.ok(transaction);
+    public ResponseEntity<TransactionResponseDTO> createTransaction(@RequestBody CreateTransactionDTO transactionDTO) {
+        TransactionResponseDTO transactionResponse = transactionService.createTransaction(transactionDTO);
+        return ResponseEntity.ok(transactionResponse);
     }
 
     @GetMapping
-    public ResponseEntity<List<Transaction>> getAllTransactions() {
-        return ResponseEntity.ok(transactionService.getAllTransactions());
+    public ResponseEntity<List<TransactionResponseDTO>> getAllTransactions() {
+        List<TransactionResponseDTO> transactions = transactionService.getAllTransactions();
+        return ResponseEntity.ok(transactions);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Transaction> getTransactionById(@PathVariable Long id) {
-        return ResponseEntity.ok(transactionService.getTransactionById(id));
+    public ResponseEntity<TransactionResponseDTO> getTransactionById(@PathVariable Long id) {
+        TransactionResponseDTO transaction = transactionService.getTransactionById(id);
+        return ResponseEntity.ok(transaction);
     }
 
     @DeleteMapping("/{id}")
