@@ -28,11 +28,13 @@ public class Transaction {
     private Account account;
 
     @ManyToOne
-    @JoinColumn(name = "transfer_customer_id", nullable = true)
-    private Customer transferCustomer;
+    @JoinColumn(name = "target_account_id", nullable = true)
+    private Account targetAccount;
 
     @Column(nullable = false, length = 1)
     private char valueType;
+
+    // Getters e Setters
 
     public Long getId() {
         return id;
@@ -74,12 +76,12 @@ public class Transaction {
         this.account = account;
     }
 
-    public Customer getTransferCustomer() {
-        return transferCustomer;
+    public Account getTargetAccount() {
+        return targetAccount;
     }
 
-    public void setTransferCustomer(Customer transferCustomer) {
-        this.transferCustomer = transferCustomer;
+    public void setTargetAccount(Account targetAccount) {
+        this.targetAccount = targetAccount;
     }
 
     public char getValueType() {

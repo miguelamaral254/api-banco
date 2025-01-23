@@ -15,14 +15,14 @@ public abstract class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
     @Column(nullable = false, unique = true)
     private int number;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "agency_id", nullable = false)
     private Agency agency;
 
@@ -101,5 +101,15 @@ public abstract class Account {
 
     public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
+    }
+
+    public void addTransaction(Transaction transaction) {
+        transaction.setAccount(this);
+        this.transactions.add(transaction);
+    }
+
+    public void removeTransaction(Transaction transaction) {
+        transaction.setAccount(null);
+        this.transactions.remove(transaction);
     }
 }
