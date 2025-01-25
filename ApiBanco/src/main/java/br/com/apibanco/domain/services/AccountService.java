@@ -2,10 +2,12 @@ package br.com.apibanco.domain.services;
 
 import br.com.apibanco.domain.DTOs.AccountResponseDTO;
 import br.com.apibanco.domain.DTOs.CreateAccountDTO;
+import br.com.apibanco.domain.DTOs.UpdateAccountDTO;
 import br.com.apibanco.domain.enums.ErrorCodeEnum;
 import br.com.apibanco.domain.exceptions.BusinessException;
 import br.com.apibanco.domain.models.Account;
 import br.com.apibanco.domain.models.Agency;
+import br.com.apibanco.domain.models.SavingsAccount;
 import br.com.apibanco.domain.repositories.AccountRepository;
 import br.com.apibanco.domain.repositories.AgencyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +63,37 @@ public abstract class AccountService<T extends Account> {
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.ACCOUNT_NOT_FOUND));
 
         return new AccountResponseDTO(account);
+    }
+    public AccountResponseDTO updateAccount(Long id, UpdateAccountDTO updateAccountDTO) {
+        if (id == null || id <= 0 || updateAccountDTO == null) {
+            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
+        }
+
+        T account = accountRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.ACCOUNT_NOT_FOUND));
+
+        if (updateAccountDTO.balance() != null) {
+            account.setBalance(updateAccountDTO.balance());
+        }
+
+        if (updateAccountDTO.status() != null) {
+            account.setStatus(updateAccountDTO.status());
+        }
+
+        if (updateAccountDTO.interestRate() != null) {
+            if (account instanceof SavingsAccount savingsAccount) {
+                savingsAccount.setInterestRate(updateAccountDTO.interestRate());
+            } else {
+                throw new BusinessException(ErrorCodeEnum.INVALID_INTEREST_RATE_UPDATE);
+            }
+        }
+
+        try {
+            // Salva as alterações no repositório
+            return new AccountResponseDTO(accountRepository.save(account));
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            throw new BusinessException(ErrorCodeEnum.DUPLICATE_ACCOUNT_NUMBER);
+        }
     }
 
     protected abstract T getEntityInstance();

@@ -19,7 +19,8 @@ public enum ErrorCodeEnum {
     SERVER_ERROR("Internal server error", "ERR-014", 500),
     DUPLICATE_CUSTOMER_CPF("Duplicate customer CPF", "ERR-015", 409),
     DUPLICATE_CUSTOMER_RG("Duplicate customer RG", "ERR-016", 409),
-    DUPLICATE_CUSTOMER_CPF_RG("Duplicate customer CPF or RG", "ERR-017", 409);
+    DUPLICATE_CUSTOMER_CPF_RG("Duplicate customer CPF or RG", "ERR-017", 409),
+    INVALID_INTEREST_RATE_UPDATE("Interest rate can only be updated for savings accounts", "ERR-019", 400);
 
 
     private final String message;

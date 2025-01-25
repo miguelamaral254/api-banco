@@ -2,6 +2,7 @@ package br.com.apibanco.api.controllers;
 
 import br.com.apibanco.domain.DTOs.AccountResponseDTO;
 import br.com.apibanco.domain.DTOs.CreateAccountDTO;
+import br.com.apibanco.domain.DTOs.UpdateAccountDTO;
 import br.com.apibanco.domain.models.Account;
 import br.com.apibanco.domain.services.AccountService;
 import org.springframework.http.ResponseEntity;
@@ -33,5 +34,13 @@ public abstract class AccountController<T extends Account> {
     public ResponseEntity<AccountResponseDTO> getAccountById(@PathVariable Long id) {
         AccountResponseDTO account = accountService.getAccountById(id);
         return ResponseEntity.ok(account);
+    }
+    @PatchMapping("/{id}")
+    public ResponseEntity<AccountResponseDTO> updateAccount(
+            @PathVariable Long id,
+            @RequestBody UpdateAccountDTO updateAccountDTO
+    ) {
+        AccountResponseDTO updatedAccount = accountService.updateAccount(id, updateAccountDTO);
+        return ResponseEntity.ok(updatedAccount);
     }
 }
