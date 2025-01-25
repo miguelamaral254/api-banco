@@ -22,21 +22,11 @@ public class TransactionController {
         return ResponseEntity.ok(transactionResponse);
     }
 
-    @GetMapping
-    public ResponseEntity<List<TransactionResponseDTO>> getAllTransactions() {
-        List<TransactionResponseDTO> transactions = transactionService.getAllTransactions();
-        return ResponseEntity.ok(transactions);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<TransactionResponseDTO> getTransactionById(@PathVariable Long id) {
         TransactionResponseDTO transaction = transactionService.getTransactionById(id);
         return ResponseEntity.ok(transaction);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
-        transactionService.deleteTransaction(id);
-        return ResponseEntity.noContent().build();
-    }
+
 }

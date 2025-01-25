@@ -21,10 +21,6 @@ public class AddressController {
         return ResponseEntity.ok(addressService.createAddress(address));
     }
 
-    @GetMapping
-    public ResponseEntity<List<Address>> getAllAddresses() {
-        return ResponseEntity.ok(addressService.getAllAddresses());
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Address> getAddressById(@PathVariable Long id) {

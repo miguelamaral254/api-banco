@@ -109,10 +109,5 @@ public class TransactionService {
         return new TransactionResponseDTO(transaction);
     }
 
-    public void deleteTransaction(Long id) {
-        Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.TRANSACTION_NOT_FOUND));
 
-        transactionRepository.delete(transaction);
-    }
 }
