@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class AccountController<T extends Account> {
 
@@ -35,12 +36,13 @@ public abstract class AccountController<T extends Account> {
         AccountResponseDTO account = accountService.getAccountById(id);
         return ResponseEntity.ok(account);
     }
+
     @PatchMapping("/{id}")
     public ResponseEntity<AccountResponseDTO> updateAccount(
             @PathVariable Long id,
-            @RequestBody UpdateAccountDTO updateAccountDTO
+            @RequestBody Map<String, Object> updates
     ) {
-        AccountResponseDTO updatedAccount = accountService.updateAccount(id, updateAccountDTO);
+        AccountResponseDTO updatedAccount = accountService.updateAccount(id, updates);
         return ResponseEntity.ok(updatedAccount);
     }
 }
