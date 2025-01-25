@@ -13,6 +13,8 @@ import br.com.apibanco.domain.repositories.AgencyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class AccountService<T extends Account> {
@@ -72,26 +74,26 @@ public abstract class AccountService<T extends Account> {
         T account = accountRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.ACCOUNT_NOT_FOUND));
 
-        if (updateAccountDTO.balance() != null) {
-            account.setBalance(updateAccountDTO.balance());
-        }
+        Map<String, Consumer<Object>> updateActions = Map.of(
+                "balance", value -> account.setBalance((Double) value),
+                "status", value -> account.setStatus((Boolean) value),
+                "interestRate", value -> ((SavingsAccount) account).setInterestRate((Double) value)
+        );
 
-        if (updateAccountDTO.status() != null) {
-            account.setStatus(updateAccountDTO.status());
-        }
+        Map<String, Object> dtoValues = Map.of(
+                "balance", updateAccountDTO.balance(),
+                "status", updateAccountDTO.status(),
+                "interestRate", updateAccountDTO.interestRate()
+        );
 
-        if (updateAccountDTO.interestRate() != null) {
-            if (account instanceof SavingsAccount savingsAccount) {
-                savingsAccount.setInterestRate(updateAccountDTO.interestRate());
-            } else {
-                throw new BusinessException(ErrorCodeEnum.INVALID_INTEREST_RATE_UPDATE);
-            }
-        }
+        dtoValues.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry -> updateActions.containsKey(entry.getKey()))
+                .forEach(entry -> updateActions.get(entry.getKey()).accept(entry.getValue()));
 
         try {
-            // Salva as alterações no repositório
             return new AccountResponseDTO(accountRepository.save(account));
-        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+        } catch (Exception ex) {
             throw new BusinessException(ErrorCodeEnum.DUPLICATE_ACCOUNT_NUMBER);
         }
     }
