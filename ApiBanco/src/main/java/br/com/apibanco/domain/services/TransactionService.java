@@ -1,16 +1,13 @@
 package br.com.apibanco.domain.services;
 
-import br.com.apibanco.domain.DTOs.AccountResponseDTO;
 import br.com.apibanco.domain.DTOs.CreateTransactionDTO;
 import br.com.apibanco.domain.DTOs.TransactionResponseDTO;
-import br.com.apibanco.domain.DTOs.UpdateAccountDTO;
+import br.com.apibanco.domain.enums.ErrorCodeEnum;
 import br.com.apibanco.domain.exceptions.BusinessException;
 import br.com.apibanco.domain.models.Account;
 import br.com.apibanco.domain.models.CheckingAccount;
 import br.com.apibanco.domain.models.SavingsAccount;
 import br.com.apibanco.domain.models.Transaction;
-import br.com.apibanco.domain.enums.ErrorCodeEnum;
-import br.com.apibanco.domain.repositories.AccountRepository;
 import br.com.apibanco.domain.repositories.CheckingAccountRepository;
 import br.com.apibanco.domain.repositories.SavingsAccountRepository;
 import br.com.apibanco.domain.repositories.TransactionRepository;
@@ -20,8 +17,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-
 @Service
 public class TransactionService {
 

@@ -20,7 +20,9 @@ public enum ErrorCodeEnum {
     DUPLICATE_CUSTOMER_CPF("Duplicate customer CPF", "ERR-015", 409),
     DUPLICATE_CUSTOMER_RG("Duplicate customer RG", "ERR-016", 409),
     DUPLICATE_CUSTOMER_CPF_RG("Duplicate customer CPF or RG", "ERR-017", 409),
-    INVALID_INTEREST_RATE_UPDATE("Interest rate can only be updated for savings accounts", "ERR-019", 400);
+    INVALID_INTEREST_RATE_UPDATE("Interest rate can only be updated for savings accounts", "ERR-019", 400),
+    ERROR_WHILE_SAVING_ACCOUNT("Error while saving account.","ERR-019",400);
+
 
 
     private final String message;
