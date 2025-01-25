@@ -2,11 +2,13 @@ package br.com.apibanco.domain.services;
 
 import br.com.apibanco.domain.DTOs.AccountResponseDTO;
 import br.com.apibanco.domain.DTOs.CreateAccountDTO;
+import br.com.apibanco.domain.DTOs.CustomerDTO;
 import br.com.apibanco.domain.DTOs.UpdateAccountDTO;
 import br.com.apibanco.domain.enums.ErrorCodeEnum;
 import br.com.apibanco.domain.exceptions.BusinessException;
 import br.com.apibanco.domain.models.Account;
 import br.com.apibanco.domain.models.Agency;
+import br.com.apibanco.domain.models.Customer;
 import br.com.apibanco.domain.models.SavingsAccount;
 import br.com.apibanco.domain.repositories.AccountRepository;
 import br.com.apibanco.domain.repositories.AgencyRepository;
@@ -23,6 +25,8 @@ public abstract class AccountService<T extends Account> {
 
     @Autowired
     private AgencyRepository agencyRepository;
+    @Autowired
+    private CustomerService customerService;
 
     protected AccountService(AccountRepository<T> accountRepository) {
         this.accountRepository = accountRepository;
@@ -33,10 +37,18 @@ public abstract class AccountService<T extends Account> {
             throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
         }
 
+        CustomerDTO customerDTO = createAccountDTO.customer();
+        if (customerDTO == null) {
+            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
+        }
+        CustomerDTO persistedCustomerDTO = customerService.createCustomer(customerDTO);
+        Customer customer = customerService.toEntity(persistedCustomerDTO);
+
         Agency agency = agencyRepository.findByNumber(createAccountDTO.agencyNumber())
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.AGENCY_NOT_FOUND));
 
         T account = getEntityInstance();
+        account.setCustomer(customer);
         account.setAgency(agency);
         account.setNumber(createAccountDTO.number());
         account.setCreationDate(createAccountDTO.creationDate());
@@ -99,20 +111,7 @@ public abstract class AccountService<T extends Account> {
         }
     }
 
-    public T findAccountByNumber(int number) {
-        return accountRepository.findAll().stream()
-                .filter(account -> account.getNumber() == number)
-                .findFirst()
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.ACCOUNT_NOT_FOUND));
-    }
 
-    public void saveAccount(T account) {
-        try {
-            accountRepository.save(account);
-        } catch (Exception ex) {
-            throw new BusinessException(ErrorCodeEnum.ERROR_WHILE_SAVING_ACCOUNT);
-        }
-    }
 
     protected abstract T getEntityInstance();
 }
