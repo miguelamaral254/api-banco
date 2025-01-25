@@ -3,16 +3,24 @@ package br.com.apibanco.domain.services;
 import br.com.apibanco.domain.DTOs.AccountResponseDTO;
 import br.com.apibanco.domain.DTOs.CreateTransactionDTO;
 import br.com.apibanco.domain.DTOs.TransactionResponseDTO;
+import br.com.apibanco.domain.DTOs.UpdateAccountDTO;
 import br.com.apibanco.domain.exceptions.BusinessException;
 import br.com.apibanco.domain.models.Account;
+import br.com.apibanco.domain.models.CheckingAccount;
+import br.com.apibanco.domain.models.SavingsAccount;
 import br.com.apibanco.domain.models.Transaction;
 import br.com.apibanco.domain.enums.ErrorCodeEnum;
+import br.com.apibanco.domain.repositories.AccountRepository;
+import br.com.apibanco.domain.repositories.CheckingAccountRepository;
+import br.com.apibanco.domain.repositories.SavingsAccountRepository;
 import br.com.apibanco.domain.repositories.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 @Service
 public class TransactionService {
@@ -21,26 +29,27 @@ public class TransactionService {
     private TransactionRepository transactionRepository;
 
     @Autowired
-    private CheckingAccountService checkingAccountService;
+    private CheckingAccountRepository checkingAccountRepository;
 
     @Autowired
-    private SavingsAccountService savingsAccountService;
+    private SavingsAccountRepository savingsAccountRepository;
 
     public TransactionResponseDTO createTransaction(CreateTransactionDTO transactionDTO) {
         if (transactionDTO == null) {
             throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
         }
 
-        // Buscar a conta de origem pelo número usando o serviço genérico
         Account account = findAccountByNumber(transactionDTO.accountNumber());
 
-        // Buscar a conta de destino pelo número, se necessário
         Account targetAccount = null;
         if (transactionDTO.targetAccountNumber() > 0) {
             targetAccount = findAccountByNumber(transactionDTO.targetAccountNumber());
         }
 
-        // Criar a transação
+        if (account.getBalance() < transactionDTO.amount()) {
+            throw new BusinessException(ErrorCodeEnum.INSUFFICIENT_BALANCE);
+        }
+
         Transaction transaction = new Transaction();
         transaction.setType(transactionDTO.type());
         transaction.setDate(transactionDTO.date());
@@ -49,32 +58,43 @@ public class TransactionService {
         transaction.setTargetAccount(targetAccount);
         transaction.setValueType(transactionDTO.valueType());
 
-        transaction = transactionRepository.save(transaction);
+        account.setBalance(account.getBalance() - transactionDTO.amount());
 
-        // Converter para DTO antes de retornar
+        if (targetAccount != null) {
+            targetAccount.setBalance(targetAccount.getBalance() + transactionDTO.amount());
+        }
+
+        transactionRepository.save(transaction);
+        saveAccount(account);
+        if (targetAccount != null) {
+            saveAccount(targetAccount);
+        }
+
         return new TransactionResponseDTO(transaction);
     }
 
     private Account findAccountByNumber(int number) {
-        Account account = checkingAccountService.getAllAccounts().stream()
-                .filter(a -> a.number() == number)
-                .findFirst()
-                .map(AccountResponseDTO::toEntity)
-                .orElse(null);
-
-        if (account == null) {
-            account = savingsAccountService.getAllAccounts().stream()
-                    .filter(a -> a.number() == number)
-                    .findFirst()
-                    .map(AccountResponseDTO::toEntity)
-                    .orElse(null);
+        Optional<CheckingAccount> checkingAccount = checkingAccountRepository.findByNumber(number);
+        if (checkingAccount.isPresent()) {
+            return checkingAccount.get();
         }
 
-        if (account == null) {
-            throw new BusinessException(ErrorCodeEnum.ACCOUNT_NOT_FOUND);
+        Optional<SavingsAccount> savingsAccount = savingsAccountRepository.findByNumber(number);
+        if (savingsAccount.isPresent()) {
+            return savingsAccount.get();
         }
 
-        return account;
+        throw new BusinessException(ErrorCodeEnum.ACCOUNT_NOT_FOUND);
+    }
+
+    private void saveAccount(Account account) {
+        if (account instanceof CheckingAccount) {
+            checkingAccountRepository.save((CheckingAccount) account);
+        } else if (account instanceof SavingsAccount) {
+            savingsAccountRepository.save((SavingsAccount) account);
+        } else {
+            throw new BusinessException(ErrorCodeEnum.INVALID_REQUEST);
+        }
     }
 
     public List<TransactionResponseDTO> getAllTransactions() {

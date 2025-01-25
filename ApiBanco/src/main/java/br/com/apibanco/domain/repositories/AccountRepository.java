@@ -4,8 +4,10 @@ import br.com.apibanco.domain.models.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
+import java.util.Optional;
+
 
 @NoRepositoryBean
 public interface AccountRepository<T extends Account> extends JpaRepository<T, Long> {
-    T findByNumber(int number);
+    Optional<T> findByNumber(int number);
 }
